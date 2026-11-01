@@ -1,10 +1,22 @@
-mini_verl — companion code for the verl book by Alan Haverford
+mini_verl — companion code for "verl From Scratch" / 《从零吃透 verl》 by Alan Haverford
 Copyright 2026 Alan Haverford
 
 Licensed under the Apache License, Version 2.0 (see LICENSE).
 
-mini_verl is an independent, simplified re-implementation of ideas from the verl project
-(https://github.com/volcengine/verl, Copyright 2024 Bytedance Ltd. and/or its affiliates and the
-verl contributors, Apache License 2.0). Class, function, metric and config-key names follow verl
-(verl v0.9.1) so that the two code bases can be read side by side.
-This project is not affiliated with or endorsed by the verl project or ByteDance.
+Provenance & Attribution Summary:
+1. All Python modules (`mini_verl/*.py`, `mini_verl/examples/*.py`, `mini_verl/tests/*.py`) were
+   written from scratch in pure CPU PyTorch (~2,000 lines) for pedagogical clarity and deterministic
+   laptop execution. No source files were copied verbatim from upstream verl, vLLM, SGLang, PyTorch
+   FSDP, Megatron-LM, or Ray.
+2. Public API identifiers — class names (`DataProto`, `WorkerGroup`, `RayPPOTrainer`,
+   `ActorRolloutRefWorker`), decorator names (`@register`, `Dispatch.*`), algorithm formulas,
+   configuration key paths, and metric names (`actor/pg_loss`, `timing_s/*`) — intentionally mirror
+   the verl project at tag `v0.9.1` (commit `1876b06d0a3e4e71e06230be10af14492ca8a75b`,
+   https://github.com/verl-project/verl, Copyright 2024 Bytedance Ltd. and/or its affiliates and the
+   verl contributors, licensed under the Apache License, Version 2.0) so readers can study the toy
+   implementation side by side with the production codebase.
+3. Short configuration snippets and CLI invocation examples quoted in the companion book follow
+   verl v0.9.1 documentation and example scripts under Apache License 2.0 attribution.
+
+This project is an independent educational work and is not affiliated with or endorsed by the verl
+project, ByteDance, NVIDIA, Alibaba Qwen, or OpenAI.

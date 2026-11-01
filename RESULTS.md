@@ -9,15 +9,14 @@ Runs are deterministic. A second run of Lab 7 printed the same output apart from
 | item | value |
 |---|---|
 | machine | Apple M5 Pro (15 cores), macOS 26.7.1, arm64 |
-| verl version mirrored | verl v0.9.1 |
-| Python / torch | 3.9.6 / torch 2.8.0 (CPU, float32) |
-| torch intra-op threads | 1, via `mini_verl.config.set_reproducible()`. Other thread counts split float reductions differently and change the numbers: the same 500-step SFT run reaches 0.155 / 0.240 / 0.315 accuracy with 1 / 2 / 5 threads. |
-| simulated DP ranks | 2 (`trainer.n_gpus_per_node=2`; in-process workers, one thread each) |
-| seeds | model init `ModelConfig.seed=0`; train/val split `data.seed=0`; SFT `SFTConfig.seed=0`; RL dataloader `trainer.seed=0`; rollout RNG `rollout.seed + rank` = 42 / 43 |
+| verl version mirrored | verl `v0.9.1` (upstream commit `1876b06d0a3e4e71e06230be10af14492ca8a75b`) |
+| Python / torch | `3.9.6` (`Clang 21.0.0`) / `torch 2.8.0` (CPU, `float32`) |
+| torch intra-op threads | `1`, via `mini_verl.config.set_reproducible()`. Other thread counts split float reductions differently and change the numbers: the same 500-step SFT run reaches `0.155 / 0.240 / 0.315` accuracy with `1 / 2 / 5` threads. |
+| simulated DP ranks | `2` (`trainer.n_gpus_per_node=2`; in-process workers, one thread each) |
+| seeds | model init `ModelConfig.seed=0`; train/val split `data.seed=0`; SFT `SFTConfig.seed=0`; RL dataloader `trainer.seed=0`; rollout RNG `rollout.seed + rank` = `42 / 43` |
+| locked verification run | `2026-10-31`: `python3 -m unittest discover -s mini_verl/tests -t . -v` → **49/49 tests OK** (`20.3 s`, including all 10 standalone chapter scripts in `examples/book_listings/`); Labs 1–9 executed end-to-end and verified bit-for-bit against all figures below |
 
-> Other CPUs or BLAS builds may give different numbers, even with one thread. The tests assert the
-> qualitative result, with margins: SFT accuracy between 0.2 and 0.5, and after only 50 RL steps at
-> least +20 points (GRPO) or +15 points (PPO).
+> **Cross-platform numerical tolerance**: Different CPU microarchitectures (x86-64 AVX2/AVX-512 vs. Apple Silicon NEON/AMX) or BLAS libraries reorder `float32` matrix-multiply reductions, producing small trajectory divergence over 200 RL steps even with `threads=1`. Exact bit-for-bit reproduction holds on the locked Apple Silicon + `torch==2.8.0` (`threads=1`) setup above; across arbitrary CPUs, `tests/test_training.py` asserts qualitative tolerances: SFT greedy accuracy in `[0.20, 0.50]`, 50-step GRPO gain `>= +0.20`, and 50-step PPO+GAE gain `>= +0.15`, while algebraic/unit tests (advantages, PPO dual-clip, KL estimators, `DataProto`, `BucketedWeightSender`, KK partitioning) match to `1e-6`.
 
 ## Task and model
 
