@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mini_verl"
+version = "0.1.0"
+description = "A ~2,000-line, CPU-only, pure-PyTorch re-implementation of the core of verl v0.9.1 (companion code for verl From Scratch)"
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "Apache-2.0"}
+authors = [
+  {name = "Alan Haverford"}
+]
+dependencies = [
+  "torch>=2.2.0,<3.0.0"
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["mini_verl*"]

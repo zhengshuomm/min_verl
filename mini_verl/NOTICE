@@ -1,0 +1,10 @@
+mini_verl — companion code for the verl book by Alan Haverford
+Copyright 2026 Alan Haverford
+
+Licensed under the Apache License, Version 2.0 (see LICENSE).
+
+mini_verl is an independent, simplified re-implementation of ideas from the verl project
+(https://github.com/volcengine/verl, Copyright 2024 Bytedance Ltd. and/or its affiliates and the
+verl contributors, Apache License 2.0). Class, function, metric and config-key names follow verl
+(verl v0.9.1) so that the two code bases can be read side by side.
+This project is not affiliated with or endorsed by the verl project or ByteDance.

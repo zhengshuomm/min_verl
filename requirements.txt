@@ -1,0 +1,3 @@
+# Minimal runtime requirements for mini_verl and all standalone book listings
+# Verified environment: Python 3.9+ (tested on 3.9 / 3.11 / 3.12), torch==2.8.0 (CPU)
+torch>=2.2.0,<3.0.0
