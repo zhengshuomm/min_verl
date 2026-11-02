@@ -32,14 +32,24 @@ trainer.fit(log_every=10)                                 # ~78% greedy validati
 ## GPU quickstart launcher for real verl (book Section 1.7)
 
 `mini_verl/scripts/verl_quickstart.sh` launches verl v0.9.1's single-GPU PPO quickstart
-(Qwen2.5-0.5B-Instruct on GSM8K) so that the driver **and every Ray worker** use the same Python environment.
-Run it from the root of a verl checkout at `v0.9.1` (`1876b06`):
+(Qwen2.5-0.5B-Instruct on GSM8K) so that the driver **and every Ray worker** use the same Python environment
+(`uv run --frozen --all-packages --extra vllm --extra fsdp` wired into both the driver and
+`ray_kwargs.ray_init.runtime_env.py_executable`). Run it from the root of a verl checkout at `v0.9.1` (`1876b06`):
 
 ```bash
-VERL_USE_UV=0 bash verl_quickstart.sh          # Path A: inside the official Docker image
-bash verl_quickstart.sh                        # Path B: Linux host + uv (uv.lock, Python 3.12)
-bash verl_quickstart.sh algorithm.adv_estimator=grpo actor_rollout_ref.rollout.n=5   # extra overrides
-DRY_RUN=1 bash verl_quickstart.sh              # print the exact commands, launch nothing
+# Path A (inside docker/Dockerfile.uv.cu130, which bakes the uv wheel cache and materializes
+#         /workspace/verl/.venv offline on first uv run) AND Path B (Linux host + uv, Python 3.12):
+bash verl_quickstart.sh
+
+# Append extra Hydra overrides (e.g. switch PPO to GRPO):
+bash verl_quickstart.sh algorithm.adv_estimator=grpo actor_rollout_ref.rollout.n=5
+
+# Pre-populated ambient python3 ONLY (e.g. Dockerfile.stable.vllm after `pip install --no-deps -e .`,
+# or after an explicit `uv sync --frozen --all-packages --extra vllm --extra fsdp`):
+VERL_USE_UV=0 bash verl_quickstart.sh
+
+# Print the exact expanded commands without launching anything (no GPU needed):
+DRY_RUN=1 bash verl_quickstart.sh
 ```
 
 All 26 Hydra override keys were checked against verl's `_generated_ppo_trainer.yaml` at `1876b06`. The GPU

@@ -1,8 +1,7 @@
 # mini_verl — measured results
 
 Every number below comes from the final code in this directory, run with the commands shown.
-Runs are deterministic. A second run of Lab 7 printed the same output apart from the timings, and
-`tests/test_training.py` (`test_runs_are_reproducible`) checks that the metrics match bit for bit.
+On the locked reference host below (`threads=1`), seeded runs reproduce the printed numbers identically: a second run of Lab 7 printed the same output apart from wall-clock timings, and `tests/test_training.py` (`test_runs_are_reproducible`) checks same-host determinism. Across other OS, CPU, or PyTorch builds, see the tolerance note below.
 
 ## Environment
 
@@ -14,7 +13,8 @@ Runs are deterministic. A second run of Lab 7 printed the same output apart from
 | torch intra-op threads | `1`, via `mini_verl.config.set_reproducible()`. Other thread counts split float reductions differently and change the numbers: the same 500-step SFT run reaches `0.155 / 0.240 / 0.315` accuracy with `1 / 2 / 5` threads. |
 | simulated DP ranks | `2` (`trainer.n_gpus_per_node=2`; in-process workers, one thread each) |
 | seeds | model init `ModelConfig.seed=0`; train/val split `data.seed=0`; SFT `SFTConfig.seed=0`; RL dataloader `trainer.seed=0`; rollout RNG `rollout.seed + rank` = `42 / 43` |
-| locked verification run | `2026-10-31`: `python3 -m unittest discover -s mini_verl/tests -t . -v` → **49/49 tests OK** (`20.3 s`, including all 10 standalone chapter scripts in `examples/book_listings/`); Labs 1–9 executed end-to-end and verified bit-for-bit against all figures below |
+| reference baseline (`2026-10-31`) | `python3 -m unittest discover -s mini_verl/tests -t . -v` → **49/49 tests OK** (`20.3 s`, including subprocess execution of all 10 standalone chapter scripts in `examples/book_listings/`); Labs 1–9 timed separately below (`lab7` RL `20.2 s` / whole script `24.3 s`, `lab8` RL `27.9 s` / whole script `32.2 s`, `lab9` `4.03 s`) |
+| clean-clone re-verification (`2026-11-01`) | Fresh clone on the same host: **49/49 unit tests OK** (`~17.5 s`), all 10 chapter listings `OK`, and separate end-to-end runs of `lab7_grpo_training` (`0.300 -> 0.780`), `lab8_ppo_with_critic` (`0.300 -> 0.760`), and `lab9_agent_loop` (`0.995 -> 1.000`) reproduced the headline accuracies identically |
 
 > **Cross-platform numerical tolerance**: Different CPU microarchitectures (x86-64 AVX2/AVX-512 vs. Apple Silicon NEON/AMX) or BLAS libraries reorder `float32` matrix-multiply reductions, producing small trajectory divergence over 200 RL steps even with `threads=1`. Exact bit-for-bit reproduction holds on the locked Apple Silicon + `torch==2.8.0` (`threads=1`) setup above; across arbitrary CPUs, `tests/test_training.py` asserts qualitative tolerances: SFT greedy accuracy in `[0.20, 0.50]`, 50-step GRPO gain `>= +0.20`, and 50-step PPO+GAE gain `>= +0.15`, while algebraic/unit tests (advantages, PPO dual-clip, KL estimators, `DataProto`, `BucketedWeightSender`, KK partitioning) match to `1e-6`.
 

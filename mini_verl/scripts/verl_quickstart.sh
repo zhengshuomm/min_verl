@@ -2,10 +2,15 @@
 # verl_quickstart.sh — verl v0.9.1 single-GPU PPO quickstart (Qwen2.5-0.5B-Instruct on GSM8K).
 # Companion launcher for "verl From Scratch", Section 1.7. Run it from the ROOT of a verl checkout at
 # tag v0.9.1 (commit 1876b06). It follows the LAUNCH/RAY convention of verl's own examples/*.sh
-# (docs/start/install.rst), so the driver AND every Ray worker run in the same Python environment.
+# (docs/start/install.rst & docs/start/quickstart.rst), so the driver AND every Ray worker run in the
+# same Python environment.
 #
-#   Path A — official Docker image (.venv already on PATH):     VERL_USE_UV=0 bash verl_quickstart.sh
+#   Path A — official uv Docker image (docker/Dockerfile.uv.cu130; bakes uv cache, materializes .venv
+#            offline on first uv run):                          bash verl_quickstart.sh
 #   Path B — Linux host + uv (Python 3.12, committed uv.lock):  bash verl_quickstart.sh
+#   Pre-populated ambient python3 ONLY (e.g. Dockerfile.stable.vllm after `pip install --no-deps -e .`,
+#            or after an explicit `uv sync --frozen --all-packages --extra vllm --extra fsdp`):
+#                                                               VERL_USE_UV=0 bash verl_quickstart.sh
 #
 # Extra Hydra overrides are appended verbatim, e.g.
 #   bash verl_quickstart.sh algorithm.adv_estimator=grpo actor_rollout_ref.rollout.n=5 \
@@ -26,6 +31,14 @@ if [ "${VERL_USE_UV:-1}" != 0 ]; then
   LAUNCH=(${UV_RUN} python3)
   # Ray starts TaskRunner and every worker actor with this prefix, inside the same locked .venv
   RAY=("ray_kwargs.ray_init.runtime_env.py_executable=${UV_RUN}")
+elif [ "${DRY_RUN:-0}" != 1 ]; then
+  if ! python3 -c "import torch, vllm, verl" >/dev/null 2>&1; then
+    echo "error: VERL_USE_UV=0 requires torch, vllm, and verl in ambient python3." >&2
+    echo "hint: docker/Dockerfile.uv.cu130 bakes the uv wheel cache, NOT a fixed .venv;" >&2
+    echo "      either drop VERL_USE_UV=0 (default uv run) or materialize .venv first via:" >&2
+    echo "      uv sync --frozen --all-packages --extra vllm --extra fsdp" >&2
+    exit 1
+  fi
 fi
 
 run() {
