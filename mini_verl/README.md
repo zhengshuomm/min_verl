@@ -2,8 +2,9 @@
 
 Companion code for **verl From Scratch** / **《从零吃透 verl》** (Alan Haverford).
 
-`mini_verl` is a ~2,000-line, CPU-only, pure-PyTorch re-implementation of the core of **verl**, the
-RL post-training framework. Classes, functions, config keys and metric names follow
+`mini_verl` is a CPU-only, pure-PyTorch re-implementation of the core of **verl**, the RL post-training
+framework. Size, counted as non-blank, non-comment Python lines: core library 1,826 (13 modules); with the
+9 labs (441), 10 standalone chapter listings (479) and 8 test files (524), 3,271 in total. Classes, functions, config keys and metric names follow
 **verl v0.9.1** (`commit 1876b06`) so that you can open the real source side by side; every docstring
 cites the verl file it mirrors. The only dependency is `torch` (see [requirements.txt](requirements.txt); tested with `torch==2.8.0`, Python 3.9+).
 
@@ -27,6 +28,22 @@ trainer = RayPPOTrainer(cfg, policy_state_dict=policy.state_dict())
 trainer.init_workers()
 trainer.fit(log_every=10)                                 # ~78% greedy validation accuracy after 200 steps
 ```
+
+## GPU quickstart launcher for real verl (book Section 1.7)
+
+`mini_verl/scripts/verl_quickstart.sh` launches verl v0.9.1's single-GPU PPO quickstart
+(Qwen2.5-0.5B-Instruct on GSM8K) so that the driver **and every Ray worker** use the same Python environment.
+Run it from the root of a verl checkout at `v0.9.1` (`1876b06`):
+
+```bash
+VERL_USE_UV=0 bash verl_quickstart.sh          # Path A: inside the official Docker image
+bash verl_quickstart.sh                        # Path B: Linux host + uv (uv.lock, Python 3.12)
+bash verl_quickstart.sh algorithm.adv_estimator=grpo actor_rollout_ref.rollout.n=5   # extra overrides
+DRY_RUN=1 bash verl_quickstart.sh              # print the exact commands, launch nothing
+```
+
+All 26 Hydra override keys were checked against verl's `_generated_ppo_trainer.yaml` at `1876b06`. The GPU
+training run itself is not part of this repository's CPU verification.
 
 ## The toy task
 
